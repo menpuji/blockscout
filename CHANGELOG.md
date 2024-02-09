@@ -6,6 +6,7 @@
 
 ### Fixes
 
+- [#9371](https://github.com/blockscout/blockscout/pull/9371) - Filter empty values before token update
 - [#9317](https://github.com/blockscout/blockscout/pull/9317) - Include null gas price txs in fee calculations
 
 ### Chore
