@@ -6,11 +6,14 @@
 
 ### Fixes
 
+- [#9371](https://github.com/blockscout/blockscout/pull/9371) - Filter empty values before token update
+- [#9317](https://github.com/blockscout/blockscout/pull/9317) - Include null gas price txs in fee calculations
 - [#9262](https://github.com/blockscout/blockscout/pull/9262) - Fix withdrawal status
 - [#9123](https://github.com/blockscout/blockscout/pull/9123) - Fixes in Optimism due to changed log topics type
 
 ### Chore
 
+- [#9361](https://github.com/blockscout/blockscout/pull/9361) - Define BRIDGED_TOKENS_ENABLED env in Dockerfile
 - [#9260](https://github.com/blockscout/blockscout/pull/9260) - Optimism Delta upgrade support by Indexer.Fetcher.OptimismTxnBatch module
 
 <details>
