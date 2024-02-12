@@ -128,7 +128,8 @@ defmodule Explorer.Application do
         configure(Explorer.Chain.Cache.RootstockLockedBTC),
         configure(Explorer.Migrator.TransactionsDenormalization),
         configure(Explorer.Migrator.AddressCurrentTokenBalanceTokenType),
-        configure(Explorer.Migrator.AddressTokenBalanceTokenType)
+        configure(Explorer.Migrator.AddressTokenBalanceTokenType),
+        configure_chain_type_dependent_process(Explorer.Chain.Cache.ValidatorStabilityCounter, "stability")
       ]
       |> List.flatten()
 
@@ -144,7 +145,8 @@ defmodule Explorer.Application do
         Explorer.Repo.RSK,
         Explorer.Repo.Shibarium,
         Explorer.Repo.Suave,
-        Explorer.Repo.BridgedTokens
+        Explorer.Repo.BridgedTokens,
+        Explorer.Repo.Stability
       ]
     else
       []
@@ -165,6 +167,14 @@ defmodule Explorer.Application do
 
   defp configure(process) do
     if should_start?(process) do
+      process
+    else
+      []
+    end
+  end
+
+  defp configure_chain_type_dependent_process(process, chain_type) do
+    if Application.get_env(:explorer, :chain_type) == chain_type do
       process
     else
       []
