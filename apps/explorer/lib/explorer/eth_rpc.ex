@@ -6,7 +6,7 @@ defmodule Explorer.EthRPC do
   alias Ecto.Type, as: EctoType
   alias Explorer.{Chain, Repo}
   alias Explorer.Chain.{Block, Data, Hash, Hash.Address, Wei}
-  alias Explorer.Chain.Cache.BlockNumber
+  alias Explorer.Chain.Cache.{BlockNumber, GasPriceOracle}
   alias Explorer.Etherscan.{Blocks, Logs, RPC}
 
   @methods %{
@@ -84,6 +84,19 @@ defmodule Explorer.EthRPC do
           }]
       }
       """
+    },
+    "eth_gasPrice" => %{
+      action: :eth_gas_price,
+      notes: """
+      Returns the average gas price per gas in wei.
+      """,
+      example: """
+      {"jsonrpc": "2.0", "id": 4, "method": "eth_gasPrice", "params": []}
+      """,
+      params: [],
+      result: """
+      {"jsonrpc": "2.0", "id": 4, "result": "0xbf69c09bb"}
+      """
     }
   }
 
@@ -130,6 +143,15 @@ defmodule Explorer.EthRPC do
 
       {:balance, {:error, :not_found}} ->
         {:error, "Balance not found"}
+    end
+  end
+
+  def eth_gas_price do
+    with {:ok, gas_prices} <- GasPriceOracle.get_gas_prices() do
+      {:ok, Wei.hex_format(gas_prices[:average][:wei])}
+    else
+      _ ->
+        {:error, "Gas price is not estimated yet"}
     end
   end
 
