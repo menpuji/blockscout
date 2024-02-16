@@ -3,6 +3,8 @@ defmodule Explorer.EthRPC do
   Ethereum JSON RPC methods logic implementation.
   """
 
+  import Explorer.EthRpcHelper
+
   alias Ecto.Type, as: EctoType
   alias Explorer.{Chain, Repo}
   alias Explorer.Chain.{Block, Data, Hash, Hash.Address, Wei}
@@ -100,6 +102,13 @@ defmodule Explorer.EthRPC do
     }
   }
 
+  @proxy_methods %{
+    "eth_getTransactionCount" => %{
+      arity: 2,
+      validators: [&address_hash_validator/1, &block_validator/1]
+    }
+  }
+
   @index_to_word %{
     0 => "first",
     1 => "second",
@@ -107,7 +116,28 @@ defmodule Explorer.EthRPC do
     3 => "fourth"
   }
 
+  # https://www.jsonrpc.org/specification
   def responses(requests) do
+    to_proxy =
+      requests
+      |> Enum.with_index()
+      |> Enum.reduce
+      |> Enum.filter(fn
+        %{"jsonrpc" => "2.0", "method" => method, "params" => params, "id" => id} when is_list(params) and (is_number(id) or is_binary(id) or is_nil(id)) ->
+          with method_definition when not is_nil(method_definition) <- @proxy_methods[method],
+               true <- method_definition[:arity] == length(params),
+               :ok <- validate_params(method_definition[:validators], params) do
+            true
+          else
+            _ ->
+              false
+          end
+
+        _ ->
+          false
+      end)
+      |> json_rpc()
+
     Enum.map(requests, fn request ->
       with {:id, {:ok, id}} <- {:id, Map.fetch(request, "id")},
            {:request, {:ok, result}} <- {:request, do_eth_request(request)} do
@@ -118,6 +148,24 @@ defmodule Explorer.EthRPC do
       end
     end)
   end
+
+  defp validate_params(validators, params) do
+    validators
+    |> Enum.zip(params)
+    |> Enum.reduce_while(:ok, fn
+      {validator_func, param}, :ok ->
+        {:cont, validator_func.(param)}
+
+      _, error ->
+        {:halt, error}
+    end)
+  end
+
+  defp json_rpc([_ | _] = requests) do
+    EthereumJSONRPC.json_rpc(requests, Application.get_env(:explorer, :json_rpc_named_arguments))
+  end
+
+  defp json_rpc([]), do: []
 
   def eth_block_number do
     max_block_number = BlockNumber.get_max()
@@ -147,9 +195,10 @@ defmodule Explorer.EthRPC do
   end
 
   def eth_gas_price do
-    with {:ok, gas_prices} <- GasPriceOracle.get_gas_prices() do
-      {:ok, Wei.hex_format(gas_prices[:average][:wei])}
-    else
+    case GasPriceOracle.get_gas_prices() do
+      {:ok, gas_prices} ->
+        {:ok, Wei.hex_format(gas_prices[:average][:wei])}
+
       _ ->
         {:error, "Gas price is not estimated yet"}
     end
