@@ -1,4 +1,8 @@
 defmodule Explorer.EthRpcHelper do
+  @moduledoc """
+  Helper module for Explorer.EthRPC. Mostly contains functions to validate input args
+  """
+
   alias Explorer.Chain.{Data, Hash.Address}
 
   @invalid_address "Invalid address"
@@ -7,6 +11,10 @@ defmodule Explorer.EthRpcHelper do
   @missed_to_address "Missed `to` address"
   @invalid_bool "Invalid bool"
 
+  @doc """
+  Validates if address is valid
+  """
+  @spec address_hash_validator(binary(), String.t()) :: :ok | {:error, String.t()}
   def address_hash_validator(address_hash, message \\ @invalid_address) do
     case Address.cast(address_hash) do
       {:ok, _} -> :ok
@@ -14,6 +22,10 @@ defmodule Explorer.EthRpcHelper do
     end
   end
 
+  @doc """
+  Validates if block is valid
+  """
+  @spec block_validator(binary()) :: :ok | {:error, String.t()}
   def block_validator(block_tag) when block_tag in ["latest", "earliest", "pending"], do: :ok
 
   def block_validator(block_number) do
@@ -24,6 +36,10 @@ defmodule Explorer.EthRpcHelper do
     parse_integer(hex) || {:error, @invalid_integer}
   end
 
+  @doc """
+  Validates eth_call map
+  """
+  @spec eth_call_validator(map()) :: :ok | {:error, String.t()}
   def eth_call_validator(%{"to" => to_address} = eth_call) do
     with :ok <- address_hash_validator(to_address, "Invalid `to` address"),
          :ok <- validate_optional_address(eth_call["from"], "from"),
@@ -40,6 +56,10 @@ defmodule Explorer.EthRpcHelper do
 
   def eth_call_validator(_), do: {:error, @missed_to_address}
 
+  @doc """
+  Validates if bool is valid
+  """
+  @spec bool_validator(boolean()) :: :ok | {:error, String.t()}
   def bool_validator(bool) when is_boolean(bool), do: :ok
   def bool_validator(_), do: {:error, @invalid_bool}
 

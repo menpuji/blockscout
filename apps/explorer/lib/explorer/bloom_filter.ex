@@ -2,17 +2,23 @@ defmodule Explorer.BloomFilter do
   @moduledoc """
   Eth Bloom filter realization. Reference: https://github.com/NethermindEth/nethermind/blob/d61c78af6de2d0a89bd4efd6bfed62cb6b774f59/src/Nethermind/Nethermind.Core/Bloom.cs
   """
+  import Bitwise
+
+  alias Explorer.BloomFilter
+  alias Explorer.Chain.Log
+
   @bloom_byte_length 256
   @bloom_bit_length 8 * @bloom_byte_length
 
-  alias Explorer.BloomFilter
-
   defstruct filter: <<0::2048>>
 
-  import Bitwise
-
+  @doc """
+  Computes bloom filter from list of logs
+  """
+  @spec logs_bloom([Log.t()]) :: <<_::2048>>
   def logs_bloom(logs) do
-    Enum.reduce(logs, %BloomFilter{}, fn log, acc ->
+    logs
+    |> Enum.reduce(%BloomFilter{}, fn log, acc ->
       topics =
         Enum.reject(
           [log.first_topic, log.second_topic, log.third_topic, log.fourth_topic],
@@ -54,13 +60,13 @@ defmodule Explorer.BloomFilter do
     <<head::binary, value, tail::binary>>
   end
 
-  def set_bit(byte, bit) do
+  defp set_bit(byte, bit) do
     mask = 1 <<< (7 - bit)
 
     bor(byte, mask)
   end
 
-  def get_extract(bytes) do
+  defp get_extract(bytes) do
     hash = hash_function(bytes)
 
     {get_index(hash, 0, 1), get_index(hash, 2, 3), get_index(hash, 4, 5)}

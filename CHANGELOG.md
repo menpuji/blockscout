@@ -4,6 +4,7 @@
 
 ### Features
 
+- [#9409](https://github.com/blockscout/blockscout/pull/9409) - ETH JSON RPC extension
 - [#9396](https://github.com/blockscout/blockscout/pull/9396) - More-Minimal Proxy support
 - [#9379](https://github.com/blockscout/blockscout/pull/9379) - Filter non-traceable transactions for zetachain
 - [#9364](https://github.com/blockscout/blockscout/pull/9364) - Fix using of startblock/endblock in API v1 list endpoints: txlist, txlistinternal, tokentx

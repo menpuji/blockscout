@@ -2,7 +2,6 @@ defmodule Explorer.EthRPC do
   @moduledoc """
   Ethereum JSON RPC methods logic implementation.
   """
-
   import Explorer.EthRpcHelper
 
   alias Ecto.Type, as: EctoType
@@ -406,7 +405,7 @@ defmodule Explorer.EthRPC do
 
   @incorrect_number_of_params "Incorrect number of params."
 
-  # https://www.jsonrpc.org/specification
+  @spec responses([map()]) :: [map()]
   def responses(requests) do
     requests =
       requests
@@ -503,16 +502,15 @@ defmodule Explorer.EthRPC do
         map
 
       {:error, _reason} = error ->
-        {results, []} =
-          Enum.map(map, fn
-            {_index, {:error, _}} = elem ->
-              elem
+        map
+        |> Enum.map(fn
+          {_index, {:error, _}} = elem ->
+            elem
 
-            {index, _request} ->
-              {index, error}
-          end)
-
-        Enum.into(results, %{})
+          {index, _request} ->
+            {index, error}
+        end)
+        |> Enum.into(%{})
     end
   end
 
@@ -520,6 +518,10 @@ defmodule Explorer.EthRPC do
     %{jsonrpc: json_rpc, method: method, params: params, id: id}
   end
 
+  @doc """
+  Handles `eth_blockNumber` method
+  """
+  @spec eth_block_number() :: {:ok, String.t()}
   def eth_block_number do
     max_block_number = BlockNumber.get_max()
 
@@ -530,6 +532,10 @@ defmodule Explorer.EthRPC do
     {:ok, max_block_number_hex}
   end
 
+  @doc """
+  Handles `eth_getBalance` method
+  """
+  @spec eth_get_balance(String.t(), String.t() | nil) :: {:ok, String.t()} | {:error, String.t()}
   def eth_get_balance(address_param, block_param \\ nil) do
     with {:address, {:ok, address}} <- {:address, Chain.string_to_address_hash(address_param)},
          {:block, {:ok, block}} <- {:block, block_param(block_param)},
@@ -547,6 +553,10 @@ defmodule Explorer.EthRPC do
     end
   end
 
+  @doc """
+  Handles `eth_gasPrice` method
+  """
+  @spec eth_gas_price() :: {:ok, String.t()} | {:error, String.t()}
   def eth_gas_price do
     case GasPriceOracle.get_gas_prices() do
       {:ok, gas_prices} ->
@@ -557,6 +567,10 @@ defmodule Explorer.EthRPC do
     end
   end
 
+  @doc """
+  Handles `eth_getTransactionByHash` method
+  """
+  @spec eth_get_transaction_by_hash(String.t()) :: {:ok, map() | nil} | {:error, String.t()}
   def eth_get_transaction_by_hash(transaction_hash_string) do
     validate_and_render_transaction(transaction_hash_string, &render_transaction/1, api?: true)
   end
@@ -585,6 +599,10 @@ defmodule Explorer.EthRPC do
      }}
   end
 
+  @doc """
+  Handles `eth_getTransactionReceipt` method
+  """
+  @spec eth_get_transaction_receipt(String.t()) :: {:ok, map() | nil} | {:error, String.t()}
   def eth_get_transaction_receipt(transaction_hash_string) do
     necessity_by_association = %{block: :optional, logs: :optional}
 
@@ -610,7 +628,7 @@ defmodule Explorer.EthRPC do
        "from" => transaction.from_address_hash,
        "gasUsed" => encode_quantity(transaction.gas_used),
        "logs" => Enum.map(transaction.logs, &render_log(&1, transaction)),
-       'logsBloom' => "0x" <> (BloomFilter.logs_bloom(transaction.logs) |> Base.encode16()),
+       'logsBloom' => "0x" <> (transaction.logs |> BloomFilter.logs_bloom() |> Base.encode16()),
        "status" => encode_quantity(status),
        "to" => transaction.to_address_hash,
        "transactionHash" => transaction.hash,
