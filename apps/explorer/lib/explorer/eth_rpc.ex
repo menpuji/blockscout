@@ -6,8 +6,19 @@ defmodule Explorer.EthRPC do
   import Explorer.EthRpcHelper
 
   alias Ecto.Type, as: EctoType
-  alias Explorer.{Chain, Helper, Repo}
-  alias Explorer.Chain.{Block, Data, Hash, Hash.Address, Wei}
+  alias Explorer.{BloomFilter, Chain, Helper, Repo}
+
+  alias Explorer.Chain.{
+    Block,
+    Data,
+    DenormalizationHelper,
+    Hash,
+    Hash.Address,
+    Transaction,
+    Transaction.Status,
+    Wei
+  }
+
   alias Explorer.Chain.Cache.{BlockNumber, GasPriceOracle}
   alias Explorer.Etherscan.{Blocks, Logs, RPC}
 
@@ -117,7 +128,56 @@ defmodule Explorer.EthRPC do
         }
       ],
       result: """
-      {"jsonrpc": "2.0", "id": 4, "result": "0xbf69c09bb"}
+      {
+        "jsonrpc": "2.0",
+        "result": {
+            "blockHash": "0x33c4ddb4478395b9d73aad2eb8640004a4a312da29ebccbaa33933a43edda019",
+            "blockNumber": "0x87855e",
+            "chainId": "0x5",
+            "from": "0xe38ecdf3cfbaf5cf347e6a3d6490eb34e3a0119d",
+            "gas": "0x186a0",
+            "gasPrice": "0x195d",
+            "hash": "0xfe524295c6c01ab25645035a228387bf0e64c8af429f3dd9d6ef2e3b05337839",
+            "input": "0xe9e05c42000000000000000000000000e38ecdf3cfbaf5cf347e6a3d6490eb34e3a0119d0000000000000000000000000000000000000000000000000001c6bf5263400000000000000000000000000000000000000000000000000000000000000186a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "maxFeePerGas": null,
+            "maxPriorityFeePerGas": null,
+            "nonce": "0x1",
+            "r": "0xf2a3f18fd456ef9a9d6201cf622b5ad14db9cfc6786ba574e036037f80a15d61",
+            "s": "0x4cbb018dc0a966cd15a6bf5f3d432c72127639314d6aeb7a6bbb36000d86dc08",
+            "to": "0xe93c8cd0d409341205a592f8c4ac1a5fe5585cfa",
+            "transactionIndex": "0x7f",
+            "type": "0x0",
+            "v": "0x2d",
+            "value": "0x1c6bf52634000"
+        },
+        "id": 4
+      }
+      """
+    },
+    "eth_getTransactionReceipt" => %{
+      action: :eth_get_transaction_receipt,
+      notes: """
+      """,
+      example: """
+      {"jsonrpc": "2.0", "id": 4, "method": "eth_getTransactionReceipt", "params": ["0x98318a5a22e363928d4565382c1022a8aed169b6a657f639c2f5c6e2c5114e4c"]}
+      """,
+      params: [
+        %{
+          name: "Data",
+          description: "32 Bytes - transaction hash to get",
+          type: "string",
+          default: nil,
+          required: true
+        }
+      ],
+      result: """
+      {
+        "jsonrpc": "2.0",
+        "result": {
+
+        },
+        "id": 4
+      }
       """
     }
   }
@@ -183,147 +243,155 @@ defmodule Explorer.EthRPC do
       """,
       result: """
       {
-        "baseFeePerGas": "0x8",
-        "blobGasUsed": "0xa0000",
-        "difficulty": "0x0",
-        "excessBlobGas": "0x4b80000",
-        "extraData": "0xd883010d09846765746888676f312e32312e36856c696e7578",
-        "gasLimit": "0x1c9c380",
-        "gasUsed": "0x13d180",
-        "hash": "0x84851ee1a5b1382898138ad9647088636e7f0dd8007d12571106dbb18bb2a6d3",
-        "logsBloom": "0x8208004000200008000004004101000000000020004003000100004200000000000030000400000008000028400002000001000000028100c00000001060208000114080080000001008000b002008000001004001420080000000000000000002040000021800000054000100004810100000040028010008004a100208001248c2400010048000800000010000003000002480020002000000000000098010020000001a000200500001402004000081028681800001000400020500000000c0140022040200000002200100000000006000000000008000010244000020000110202804200018008104000000000008000000001002000400000000004000",
-        "miner": "0x94750381be1aba0504c666ee1db118f68f0780d4",
-        "mixHash": "0x39de028cc3fb8d9baf91b0720a0d2cdca8a343266e62e6a9dfc01554fa4fb3cf",
-        "nonce": "0x0000000000000000",
-        "number": "0xa0f41e",
-        "parentBeaconBlockRoot": "0x374099b35fe33790ce4f9743115aac2bbfb2f797be7808a98a1030e67effbfad",
-        "parentHash": "0x030cbe8bba962ac1f052e509afa5013dfa3c7ca584354435e21ad6ecfeddddd6",
-        "receiptsRoot": "0x4c42cd59b1a73381a496b408c1287a87d0fb11f61099090cadc70b6bd2328795",
-        "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
-        "size": "0x1cbb",
-        "stateRoot": "0x88ddfb5cf8102a1ee92758d0020d3e7bce6d28e9e40932157687a8131b6fa928",
-        "timestamp": "0x65cfb770",
-        "totalDifficulty": "0xa4a470",
-        "transactions": [
-            "0x3bf013bfafc3f14ceb5e4ae782d3b0ad16dfbaf7a7c05061c3411908ea50628a",
-            "0xb44bd74266efc598852f3344a750e520d0620c3c6061eb2f910bab5e412d5824",
-            "0x78532bbd27a4bccbe33e9b4eb675a9b731935e9aa108062ae628e87aac353f26",
-            "0xd002f4ff977ebaf38923ceef4f4cf03c13bfc08265f719e2669236cdca757321",
-            "0x34ead4a41f04d809468e5c9d245c2a90a93d316ebde0e7bd289572d42b119b94",
-            "0xbc4777663752a2d40d4c778352d7655a2254d438d09c3de10ff037d38c47cb6a",
-            "0x582dadac41286a8c1de49df6058643cc5e23c41389ccfde93c9e1a579d4dc4b3",
-            "0x347f8272088c288ffb24afff4aa7a0386ab9c5b8813e0ef82fcc5f58e79bb3ef",
-            "0xd0503d439cc41a2521292d67a1b20afe01d368f4f15ef7700066388267cbd83a",
-            "0x75f3f0aeede8d9f93ee6022834a856627eeb0f3a3e0a1739bf191472cd666b8d",
-            "0x08ae89549a14431b03d2dbdeb1955b5a0bdd152169cc519949a460813bb4acba",
-            "0xb0f238b083759e76176452c8d880c0ce84d867957f30f82d0b3ef66581ba5c2f",
-            "0x15743c890560823e6e5539ceb12380833a2721a0a2a04a0e2435b88890496e6e",
-            "0x42e23e92fe82e6af75af1dfe4c4869aa87011386c455165cd81725b90537e451",
-            "0x5176583adbb4f881c8627c12dfe9723ecdf496b07da919eddaa2b009a8983cfd",
-            "0x3e2afe2ea46dfc1467eca7cf8e08ca5c9ea21a6d8c382fff8299189357328040",
-            "0x93993c91f54642f81379ae5fe7983025bd12219254de98f6ead5f701f759810e"
-        ],
-        "transactionsRoot": "0x7b40ab6aa1d0bef1c878fb175b949315e8e8edf59eba9a9a1e3ddabe321827ae",
-        "uncles": [],
-        "withdrawals": [
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b19e9",
-                "index": "0x1cd40c4",
-                "validatorIndex": "0x9387a"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b0ad0",
-                "index": "0x1cd40c5",
-                "validatorIndex": "0x9387b"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b89a3",
-                "index": "0x1cd40c6",
-                "validatorIndex": "0x9387c"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x29dcbc",
-                "index": "0x1cd40c7",
-                "validatorIndex": "0x9387d"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2a1e54",
-                "index": "0x1cd40c8",
-                "validatorIndex": "0x9387e"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2a3dc3",
-                "index": "0x1cd40c9",
-                "validatorIndex": "0x9387f"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2ad9f6",
-                "index": "0x1cd40ca",
-                "validatorIndex": "0x93880"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2abc0d",
-                "index": "0x1cd40cb",
-                "validatorIndex": "0x93881"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b1ede",
-                "index": "0x1cd40cc",
-                "validatorIndex": "0x93882"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b09b9",
-                "index": "0x1cd40cd",
-                "validatorIndex": "0x93883"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2ad1b1",
-                "index": "0x1cd40ce",
-                "validatorIndex": "0x93884"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2ae98a",
-                "index": "0x1cd40cf",
-                "validatorIndex": "0x93885"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b85ff",
-                "index": "0x1cd40d0",
-                "validatorIndex": "0x93886"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2b4ed6",
-                "index": "0x1cd40d1",
-                "validatorIndex": "0x93887"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x29192d",
-                "index": "0x1cd40d2",
-                "validatorIndex": "0x93888"
-            },
-            {
-                "address": "0xdc62f9e8c34be08501cdef4ebde0a280f576d762",
-                "amount": "0x2adcad",
-                "index": "0x1cd40d3",
-                "validatorIndex": "0x93889"
-            }
-        ],
-        "withdrawalsRoot": "0x978f98003a89e0db5adfac08f7631fccf9dc984a25260b483848ff0197927bea"
+        "jsonrpc": "2.0",
+        "result": {
+            "baseFeePerGas": "0x7",
+            "blobGasUsed": "0x0",
+            "difficulty": "0x0",
+            "excessBlobGas": "0x4bc0000",
+            "extraData": "0xd883010d0a846765746888676f312e32312e35856c696e7578",
+            "gasLimit": "0x1c9c380",
+            "gasUsed": "0x29b80d",
+            "hash": "0xbc2e3a9caf7364d306fe4af34d2e9f0a3d478ed1a8e135bf7cd0845646c858f5",
+            "logsBloom": "0x022100021800180480000040e0008004001044020100000204080000a20001100100100002000802c00020194040204000020010000200400000020004212000804100a4242020041800108d0228082402000040090000c80001040080000080000600000224a0b00000d88000004803000000220008014000204010100040008000804408000004200000250010400004001481a80001080080404104114040032000307022969010004000840040000322400002010108490180088040205030055002481208004903100400070000104000002008001008080010002020001818002020a04000501101080000000000201004000001400040880000000000",
+            "miner": "0x94750381be1aba0504c666ee1db118f68f0780d4",
+            "mixHash": "0xd6b01921b81abdec5eccc9f5e17246be9dfec6d3bdbf59503bdeee2db3f97a57",
+            "nonce": "0x0000000000000000",
+            "number": "0xa0ff94",
+            "parentBeaconBlockRoot": "0xbd4670ba8503146561cb96962185fc251e2040eed07fccc749a26b8edbfd2d1c",
+            "parentHash": "0x7d4de3172a22e4549b28492ab9ffe6b5bf050b82d2c9b744133657aa7ae4385d",
+            "receiptsRoot": "0x13ae8ce96a643074f94bc1358b1ac1a3e3660856df943b9c6b60d499386e580d",
+            "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+            "size": "0x2d07",
+            "stateRoot": "0x68510947af6edb94d0d1852d881589001318872b5bad832006c569e1a4f26871",
+            "timestamp": "0x65d07350",
+            "totalDifficulty": "0xa4a470",
+            "transactions": [
+                "0xa3bb1b7bb5ee2d04114d47bbca1d8597c390e7c8ccfe04b5bfe96f6dfe897ec7",
+                "0xb6f680d4ba7e258e5e306744e61be1abb9b6cd005eb9423badc0b3603eb4ad5c",
+                "0x3c97b4ee54827e95ebf915dafdba9059ba5f4013c0371d443fe934a644725c60",
+                "0xd91e6db89992030da48d92825220053b1ea39f6d8d619c0f3fbc9a9e059c903e",
+                "0xbf763dc0a81dd2ef44f19673f001de560bce4db1499b7c0461c208afd863a62c",
+                "0xadd61d6e79560df74dc72891b2b19c83586d7857e313c0fdea9edbe1bfb11866",
+                "0xc66df09eaefac0348f48ce9e3f79e27a537bc8f274c525dd884f285d5e05bf31",
+                "0x217a26e8e407638e68364c2edebdae35f2a55eae080caa9ab31be430247a06e7",
+                "0xcae598dde02f35993cc4dad6f431596d8326a69b8f6563156edc3e970d6736d6",
+                "0xcfa79201e7574bce217f3f790f99bee8e0af45cffcd75ad17a9742630664df3f",
+                "0xe1e9b3b32e1098b3e08786407043410a6142481c1076818341cb05d7ebb3aaa3",
+                "0x7ce2eb696fd7c60e443bfeeeb39c2011d968b7bcfa40c20613549963f11e30a6",
+                "0xb4b5db2b4397e89b068ca01fc1b6bf8494a7fcd60e39e7059baef2968e874ba4",
+                "0x877e4ce429f4b64a095e0648b5ee69c31591116a697d03fddc5ff069302c944d",
+                "0xa5b8f358a3210221551250369c8dc2584c79fb424af1dd134bdab3a125eb1ea8",
+                "0x1c1d3df874c3ff9b84195bfe0bd5dbd50677443ff9a429bd01de4a18ccaf9293",
+                "0x79be4e1a433f250a35b7898916a0611f957fb7ca522836354eebfa421b2c8c99",
+                "0xd1c7fc2537a6627d0056e70a23bf90f988eabc518a31cd3d7520ec4ca0f9f9f0",
+                "0xb8c0b577257a0a184bf53454b68ce612a7567bcce48a64ee10e8b3d899c6ee16",
+                "0x26e81d1ba0109e5f50da13cb03d70a4fd5ffc97a0dad8e0c33fa7a8856db1480",
+                "0x4667088b1ab61818ebd08810a354dbe2f1ce9a4cb3f735aa692efcc8f15c7e5f"
+            ],
+            "transactionsRoot": "0x9d4d5a21e9ae6294a2a197c6d051a184c109882a7f74b7e63aaf3e64e4a77a33",
+            "uncles": [],
+            "withdrawals": [
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x13d378",
+                    "index": "0x1cdf824",
+                    "validatorIndex": "0xa6d24"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x124012",
+                    "index": "0x1cdf825",
+                    "validatorIndex": "0xa6d25"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x175e6f",
+                    "index": "0x1cdf826",
+                    "validatorIndex": "0xa6d26"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x16b5fe",
+                    "index": "0x1cdf827",
+                    "validatorIndex": "0xa6d27"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x1660d2",
+                    "index": "0x1cdf828",
+                    "validatorIndex": "0xa6d28"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x145405",
+                    "index": "0x1cdf829",
+                    "validatorIndex": "0xa6d29"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x16246d",
+                    "index": "0x1cdf82a",
+                    "validatorIndex": "0xa6d2a"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x14a5a1",
+                    "index": "0x1cdf82b",
+                    "validatorIndex": "0xa6d2b"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x142199",
+                    "index": "0x1cdf82c",
+                    "validatorIndex": "0xa6d2c"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x182250",
+                    "index": "0x1cdf82d",
+                    "validatorIndex": "0xa6d2d"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x18b97e",
+                    "index": "0x1cdf82e",
+                    "validatorIndex": "0xa6d2e"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x151536",
+                    "index": "0x1cdf82f",
+                    "validatorIndex": "0xa6d2f"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x14bc4a",
+                    "index": "0x1cdf830",
+                    "validatorIndex": "0xa6d30"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x162f06",
+                    "index": "0x1cdf831",
+                    "validatorIndex": "0xa6d31"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x13563b",
+                    "index": "0x1cdf832",
+                    "validatorIndex": "0xa6d32"
+                },
+                {
+                    "address": "0x46e77b9485b13b4d401dac9ad3f59700a5200aeb",
+                    "amount": "0x148d8b",
+                    "index": "0x1cdf833",
+                    "validatorIndex": "0xa6d33"
+                }
+            ],
+            "withdrawalsRoot": "0xc6a4b2cace2cc78c3a304731165b848e455fc7a3bf876837048cb4974a62c25f"
+        },
+        "id": 0
       }
       """
     }
@@ -490,17 +558,7 @@ defmodule Explorer.EthRPC do
   end
 
   def eth_get_transaction_by_hash(transaction_hash_string) do
-    with {:transaction_hash, {:ok, transaction_hash}} <-
-           {:transaction_hash, Chain.string_to_transaction_hash(transaction_hash_string)},
-         {:transaction, {:ok, transaction}} <- {:transaction, Chain.hash_to_transaction(transaction_hash, [])} do
-      render_transaction(transaction)
-    else
-      {:transaction_hash, :error} ->
-        {:error, "Transaction hash is invalid"}
-
-      {:transaction, _} ->
-        {:ok, nil}
-    end
+    validate_and_render_transaction(transaction_hash_string, &render_transaction/1, api?: true)
   end
 
   defp render_transaction(transaction) do
@@ -525,6 +583,54 @@ defmodule Explorer.EthRPC do
        "r" => encode_quantity(transaction.r),
        "s" => encode_quantity(transaction.s)
      }}
+  end
+
+  def eth_get_transaction_receipt(transaction_hash_string) do
+    necessity_by_association = %{block: :optional, logs: :optional}
+
+    validate_and_render_transaction(transaction_hash_string, &render_transaction_receipt/1,
+      api?: true,
+      necessity_by_association: necessity_by_association
+    )
+  end
+
+  defp render_transaction_receipt(transaction) do
+    {:ok, status} = Status.dump(transaction.status)
+
+    {:ok,
+     %{
+       "blockHash" => transaction.block_hash,
+       "blockNumber" => encode_quantity(transaction.block_number),
+       "contractAddress" => transaction.created_contract_address_hash,
+       "cumulativeGasUsed" => encode_quantity(transaction.cumulative_gas_used),
+       "effectiveGasPrice" =>
+         (transaction.gas_price || transaction |> Transaction.effective_gas_price())
+         |> Wei.to(:wei)
+         |> encode_quantity(),
+       "from" => transaction.from_address_hash,
+       "gasUsed" => encode_quantity(transaction.gas_used),
+       "logs" => Enum.map(transaction.logs, &render_log(&1, transaction)),
+       'logsBloom' => "0x" <> (BloomFilter.logs_bloom(transaction.logs) |> Base.encode16()),
+       "status" => encode_quantity(status),
+       "to" => transaction.to_address_hash,
+       "transactionHash" => transaction.hash,
+       "transactionIndex" => encode_quantity(transaction.index),
+       "type" => encode_quantity(transaction.type)
+     }}
+  end
+
+  defp validate_and_render_transaction(transaction_hash_string, render_func, params) do
+    with {:transaction_hash, {:ok, transaction_hash}} <-
+           {:transaction_hash, Chain.string_to_transaction_hash(transaction_hash_string)},
+         {:transaction, {:ok, transaction}} <- {:transaction, Chain.hash_to_transaction(transaction_hash, params)} do
+      render_func.(transaction)
+    else
+      {:transaction_hash, :error} ->
+        {:error, "Transaction hash is invalid"}
+
+      {:transaction, _} ->
+        {:ok, nil}
+    end
   end
 
   def eth_get_logs(filter_options) do
@@ -558,11 +664,7 @@ defmodule Explorer.EthRPC do
   end
 
   defp render_log(log) do
-    topics =
-      Enum.reject(
-        [log.first_topic, log.second_topic, log.third_topic, log.fourth_topic],
-        &is_nil/1
-      )
+    topics = prepare_topics(log)
 
     %{
       "address" => to_string(log.address_hash),
@@ -576,6 +678,37 @@ defmodule Explorer.EthRPC do
       "transactionIndex" => log.transaction_index,
       "transactionLogIndex" => log.index
     }
+  end
+
+  defp render_log(log, transaction) do
+    topics = prepare_topics(log)
+
+    %{
+      "address" => log.address_hash,
+      "blockHash" => log.block_hash,
+      "blockNumber" => encode_quantity(log.block_number),
+      "data" => log.data,
+      "logIndex" => encode_quantity(log.index),
+      "removed" => transaction_consensus(transaction) == false,
+      "topics" => topics,
+      "transactionHash" => log.transaction_hash,
+      "transactionIndex" => encode_quantity(transaction.index)
+    }
+  end
+
+  defp transaction_consensus(transaction) do
+    if DenormalizationHelper.denormalization_finished?() do
+      transaction.block_consensus
+    else
+      transaction.block.consensus
+    end
+  end
+
+  defp prepare_topics(log) do
+    Enum.reject(
+      [log.first_topic, log.second_topic, log.third_topic, log.fourth_topic],
+      &is_nil/1
+    )
   end
 
   defp cast_block("0x" <> hexadecimal_digits = input) do
