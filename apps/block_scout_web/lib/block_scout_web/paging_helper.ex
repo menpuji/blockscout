@@ -31,8 +31,8 @@ defmodule BlockScoutWeb.PagingHelper do
       ]
   end
 
-  @allowed_token_transfer_type_labels ["ERC-20", "ERC-721", "ERC-1155"]
-  @allowed_nft_type_labels ["ERC-721", "ERC-1155"]
+  @allowed_token_transfer_type_labels ["ERC-20", "ERC-721", "ERC-1155", "ERC-404"]
+  @allowed_nft_type_labels ["ERC-721", "ERC-1155", "ERC-404"]
   @allowed_chain_id [1, 56, 99]
 
   def paging_options(%{"block_number" => block_number_string, "index" => index_string}, [:validated | _]) do
