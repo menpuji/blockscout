@@ -17,6 +17,7 @@
 
 ### Fixes
 
+- [#9426](https://github.com/blockscout/blockscout/pull/9426) - Fix tabs counter cache bug
 - [#9387](https://github.com/blockscout/blockscout/pull/9387) - Filter out Vyper contracts in Solidityscan API endpoint
 - [#9377](https://github.com/blockscout/blockscout/pull/9377) - Speed up account abstraction proxy
 - [#9371](https://github.com/blockscout/blockscout/pull/9371) - Filter empty values before token update
