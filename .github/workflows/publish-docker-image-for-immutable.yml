@@ -15,10 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup repo
-        uses: ./.github/actions/setup-repo-and-short-sha
+        uses: ./.github/actions/setup-repo
         with:
           docker-username: ${{ secrets.DOCKER_USERNAME }}
           docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          docker-multi-platform: true
+          docker-arm-host: 3.145.97.144
+          docker-arm-host-key: ${{ secrets.ARM_RUNNER_KEY }}
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

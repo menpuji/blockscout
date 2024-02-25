@@ -24,6 +24,9 @@ jobs:
         with:
           docker-username: ${{ secrets.DOCKER_USERNAME }}
           docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          docker-multi-platform: true
+          docker-arm-host: 3.145.97.144
+          docker-arm-host-key: ${{ secrets.ARM_RUNNER_KEY }}
 
       - name: Build & Push Docker image
         uses: docker/build-push-action@v5
