@@ -49,8 +49,8 @@ services:
       file: ./services/frontend.yml
       service: frontend
     environment:
-      NEXT_PUBLIC_NETWORK_ID: '1337'
-      NEXT_PUBLIC_NETWORK_RPC_URL: http://host.docker.internal:8545/
+      NEXT_PUBLIC_NETWORK_ID: '10000'
+      NEXT_PUBLIC_NETWORK_RPC_URL: https://smartbch.greyh.at
 
   stats-db-init:
     extends:
